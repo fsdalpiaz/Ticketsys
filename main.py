@@ -7,7 +7,7 @@ Created on Wed Nov 16 20:00:03 2022
 
 import datetime as dt
 from guizero import *
-import queue as fila
+import queue as que
 
 def open_ticket_window():
     ticketwindow.show()
