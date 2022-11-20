@@ -9,12 +9,11 @@ import datetime as dt
 from guizero import *
 import queue as fila
 
-def open_ticket_window():
-    ticketwindow.show()
-def open_call_window():
-    callwindow.show()
+#cria filas, listas e contadores
+priorityQueue = fila.Queue(maxsize=0)
+normalQueue = fila.Queue(maxsize=0)
 
-
+contticket = 1
 cont = 0
 
 class Ticket:
@@ -22,6 +21,38 @@ class Ticket:
         self.datenow = dt.datetime.now()
         self.tipo = tipo
         self.numero = numero
+
+#funções
+def open_ticket_window():
+    ticketwindow.show(wait=True)
+def open_call_window():
+    callwindow.show(wait=True)
+
+def gera_ticket_normal():
+    global contticket
+    ticketnormal = Ticket("normal", contticket)
+    ticketlistnormal.append(f"Ticket {ticketnormal.tipo}, Número: {ticketnormal.numero},"
+                            f" Data: {ticketnormal.datenow.day}/{ticketnormal.datenow.month},"
+                            f" Hora:{ticketnormal.datenow.hour}:{ticketnormal.datenow.minute}:{ticketnormal.datenow.second}")
+    normalQueue.put(ticketnormal)
+    ticketlistnormal.show()
+    contticket += 1
+
+def gera_ticket_prior():
+    global contticket
+    ticketprior = Ticket("Prioritário", contticket)
+    ticketlistprior.append(f"Ticket {ticketprior.tipo}, Número: {ticketprior.numero},"
+                            f" Data: {ticketprior.datenow.day}/{ticketprior.datenow.month},"
+                            f" Hora:{ticketprior.datenow.hour}:{ticketprior.datenow.minute}:{ticketprior.datenow.second}")
+    priorityQueue.put(ticketprior)
+    ticketlistprior.show()
+    contticket += 1
+
+# def atende_bem():
+#     global cont
+#     if cont == 3:
+
+
 #janela principal
 windowmenu = App(title="Menu Principal",
                     width=720,
@@ -48,41 +79,54 @@ ticketwindow = Window(windowmenu,
                         bg="gray")
 ticketwindow.hide()
 #configurações da janela ticket
+#Box que encapsula os botões
 ticketbuttonbox = Box(ticketwindow, layout="grid", visible=True, enabled=True)
 ticketbuttonbox.set_border(20, "gray")
-generatepriorticket = PushButton(ticketbuttonbox, text=f"Prioritário", padx=100, pady=50, grid=[0,0])
-generatenormalticket = PushButton(ticketbuttonbox, text=f"Normal", padx=100, pady=50, grid=[1,0])
+#botões
+generatenormalticket = PushButton(ticketbuttonbox, command=gera_ticket_normal, text=f"Normal", padx=100, pady=50, grid=[0,0])
+generatepriorticket = PushButton(ticketbuttonbox, command=gera_ticket_prior, text=f"Prioritário", padx=100, pady=50, grid=[1,0])
 generatepriorticket.bg = "yellow"
 generatenormalticket.bg = "white"
 generatepriorticket.text_size = 20
 generatenormalticket.text_size = 20
-#caixa de tickets gerados - fila
-ticketlist = ListBox(ticketwindow,
-                     width=500,
-                     height=400,
-                     scrollbar=True)
-ticketlist.bg = "white"
+#Box que encapsula as listbox
+listsbox = Box(ticketwindow, layout="grid", visible=True, enabled=True)
+ticketbuttonbox.set_border(20, "gray")
+#caixa de tickets gerados - fila normal
+ticketlistnormal = ListBox(listsbox,
+                            width=400,
+                            height=400,
+                            scrollbar=True,
+                            grid=[0,0])
+ticketlistnormal.bg = "white"
+#caixa de tickets gerados - fila prioritária
+ticketlistprior = ListBox(listsbox,
+                            width=400,
+                            height=400,
+                            scrollbar=True,
+                            grid=[1,0])
+ticketlistprior.bg = "white"
 
 
 #janela atendimento
 callwindow = Window(windowmenu,
-                        title="Gerar Tickets de Atendimento",
-                        width=1000,
-                        height=1000,
-                        layout="auto",
-                        visible=True,
-                        bg="gray")
+                    title="Gerar Tickets de Atendimento",
+                    width=1000,
+                    height=1000,
+                    layout="auto",
+                    visible=True,
+                    bg="gray")
 callwindow.hide()
 #configurações da janela atendimento
 callsbuttonbox = Box(callwindow, layout="grid", visible=True, enabled=True)
 callsbuttonbox.set_border(20, "gray")
+#botão
 callpeople = PushButton(callsbuttonbox, text=f"Atender", padx=100, pady=50, grid=[0,0])
 callpeople.bg = "white"
 callpeople.text_size = 20
 #caixa de tickets gerados - fila
 callList = ListBox(callwindow, width=500, height=400)
 callList.bg = "white"
-
 
 
 #reproduz a GUI
