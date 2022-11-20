@@ -48,10 +48,20 @@ def gera_ticket_prior():
     ticketlistprior.show()
     contticket += 1
 
-# def atende_bem():
-#     global cont
-#     if cont == 3:
-#
+def atende_bem():
+    global cont
+    if cont == 3:
+        calledticket = priorityQueue.get()
+        global calling = f"Ticket {ticketprior.tipo}," \
+                         f" Número: {ticketprior.numero}," \
+                         f" Data: {ticketprior.datenow.day}/{ticketprior.datenow.month}," \
+                         f" Hora:{ticketprior.datenow.hour}:{ticketprior.datenow.minute}:{ticketprior.datenow.second}"
+        whocalled.enabled()
+        whocalled.show()
+        global cont = 0
+    else:
+
+
 
 #janela principal
 windowmenu = App(title="Menu Principal",
@@ -124,8 +134,16 @@ callsbuttonbox.set_border(20, "gray")
 callpeople = PushButton(callsbuttonbox, text=f"Atender", padx=100, pady=50, grid=[0,0])
 callpeople.bg = "white"
 callpeople.text_size = 20
+#caixa de texto, mostra atendimento atual
+called = TitleBox(callwindow, text=f"Em Atendimento: ", width=350, height=50, grid=[0,1])
+whocalled = Text(called, text=calling, font="Arial", size=14, enabled=False)
+whocalled.hide()
+
 #caixa de tickets gerados - fila
-callList = ListBox(callwindow, width=500, height=400)
+callList = ListBox(callwindow,
+                   width=500,
+                   height=400,
+                   scrollbar=True)
 callList.bg = "white"
 
 
