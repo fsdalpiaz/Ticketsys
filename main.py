@@ -51,7 +51,7 @@ def gera_ticket_prior():
 # def atende_bem():
 #     global cont
 #     if cont == 3:
-
+#
 
 #janela principal
 windowmenu = App(title="Menu Principal",
