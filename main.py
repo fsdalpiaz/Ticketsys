@@ -5,17 +5,16 @@ Created on Wed Nov 16 20:00:03 2022
 @author: fsdalpiaz
 """
 
+# don't forget to access https://lawsie.github.io/guizero/
+# and https://docs.python.org/3/library/queue.html#module-queue
+# and https://docs.python.org/3/library/datetime.html?highlight=datetime#module-datetime
+# to get more information about these important packages
+
 import datetime as dt
 from guizero import *
 import queue as fila
 
-#cria filas, listas e contadores
-priorityQueue = fila.Queue(maxsize=0)
-normalQueue = fila.Queue(maxsize=0)
-
-contticket = 1
-cont = 0
-
+#classes
 class Ticket:
     def __init__(self, tipo, numero):
         self.datenow = dt.datetime.now()
@@ -24,9 +23,9 @@ class Ticket:
 
 #funções
 def open_ticket_window():
-    ticketwindow.show(wait=True)
+    ticketwindow.show()
 def open_call_window():
-    callwindow.show(wait=True)
+    callwindow.show()
 
 def gera_ticket_normal():
     global contticket
@@ -50,17 +49,54 @@ def gera_ticket_prior():
 
 def atende_bem():
     global cont
-    if cont == 3:
-        calledticket = priorityQueue.get()
-        global calling = f"Ticket {ticketprior.tipo}," \
-                         f" Número: {ticketprior.numero}," \
-                         f" Data: {ticketprior.datenow.day}/{ticketprior.datenow.month}," \
-                         f" Hora:{ticketprior.datenow.hour}:{ticketprior.datenow.minute}:{ticketprior.datenow.second}"
-        whocalled.enabled()
-        whocalled.show()
-        global cont = 0
+    global calling
+    if len(calling) > 0:
+        calling.clear()
+    if priorityQueue.empty() == True and normalQueue.empty() == True:
+        callpeople.enabled = False
+        callwindow.warn("Atenção", "Você não tem atendimentos registrados!")
+        callpeople.enabled = True
     else:
+        if cont == 2 and priorityQueue.empty() == False:
+            ncalledticket = priorityQueue.get()
+            callList.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero},"
+                            f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month},"
+                            f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            calling.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero}"
+                       f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month}"
+                       f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            callList.show()
+            cont = 0
+        elif cont != 2 and normalQueue.empty() == True:
+            ncalledticket = priorityQueue.get()
+            callList.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero},"
+                            f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month},"
+                            f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            calling.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero}"
+                           f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month}"
+                           f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            callList.show()
+            cont = 0
+        else:
+            ncalledticket = normalQueue.get()
+            callList.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero},"
+                            f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month},"
+                            f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            calling.append(f"Ticket {ncalledticket.tipo}, Número: {ncalledticket.numero}"
+                           f" Data: {ncalledticket.datenow.day}/{ncalledticket.datenow.month}"
+                           f" Hora:{ncalledticket.datenow.hour}:{ncalledticket.datenow.minute}:{ncalledticket.datenow.second}")
+            callList.show()
+            cont += 1
+        whocalled.value = calling[0]
+        whocalled.show()
 
+
+#cria filas, listas e contadores
+priorityQueue = fila.Queue(maxsize=0)
+normalQueue = fila.Queue(maxsize=0)
+contticket = 1
+cont = 0
+calling = []
 
 
 #janela principal
@@ -68,10 +104,10 @@ windowmenu = App(title="Menu Principal",
                     width=720,
                     height=350,
                     layout="grid",
-                    visible=True,
                     bg="black")
+windowmenu.focus()
 #configurações da janela principal
-buttonbox = Box(windowmenu, layout="grid", border=80, grid=[0,0], visible=True, enabled=True)
+buttonbox = Box(windowmenu, layout="grid", border=80, grid=[0,0])
 ticketswindowbutton = PushButton(buttonbox, text=f"Gerar Ticket", command=open_ticket_window, padx=50, pady=50, grid=[0,0])
 callswindowbutton = PushButton(buttonbox, text=f"Atendimento",command=open_call_window, padx=60, pady=50, grid=[1,0])
 ticketswindowbutton.bg = "white"
@@ -85,12 +121,11 @@ ticketwindow = Window(windowmenu,
                         width=1000,
                         height=1000,
                         layout="auto",
-                        visible=True,
                         bg="gray")
 ticketwindow.hide()
 #configurações da janela ticket
 #Box que encapsula os botões
-ticketbuttonbox = Box(ticketwindow, layout="grid", visible=True, enabled=True)
+ticketbuttonbox = Box(ticketwindow, layout="grid")
 ticketbuttonbox.set_border(20, "gray")
 #botões
 generatenormalticket = PushButton(ticketbuttonbox, command=gera_ticket_normal, text=f"Normal", padx=100, pady=50, grid=[0,0])
@@ -100,7 +135,7 @@ generatenormalticket.bg = "white"
 generatepriorticket.text_size = 20
 generatenormalticket.text_size = 20
 #Box que encapsula as listbox
-listsbox = Box(ticketwindow, layout="grid", visible=True, enabled=True)
+listsbox = Box(ticketwindow, layout="grid")
 ticketbuttonbox.set_border(20, "gray")
 #caixa de tickets gerados - fila normal
 ticketlistnormal = ListBox(listsbox,
@@ -124,21 +159,19 @@ callwindow = Window(windowmenu,
                     width=1000,
                     height=1000,
                     layout="auto",
-                    visible=True,
                     bg="gray")
 callwindow.hide()
 #configurações da janela atendimento
-callsbuttonbox = Box(callwindow, layout="grid", visible=True, enabled=True)
+callsbuttonbox = Box(callwindow, layout="grid")
 callsbuttonbox.set_border(20, "gray")
 #botão
-callpeople = PushButton(callsbuttonbox, text=f"Atender", padx=100, pady=50, grid=[0,0])
+callpeople = PushButton(callsbuttonbox, text=f"Atender", command=atende_bem, padx=100, pady=50, grid=[0,0])
 callpeople.bg = "white"
 callpeople.text_size = 20
 #caixa de texto, mostra atendimento atual
-called = TitleBox(callwindow, text=f"Em Atendimento: ", width=350, height=50, grid=[0,1])
-whocalled = Text(called, text=calling, font="Arial", size=14, enabled=False)
+called = TitleBox(callwindow, text=f"Em Atendimento: ", width=600, height=65)
+whocalled = Text(called, text="", font="Arial", size=14)
 whocalled.hide()
-
 #caixa de tickets gerados - fila
 callList = ListBox(callwindow,
                    width=500,
